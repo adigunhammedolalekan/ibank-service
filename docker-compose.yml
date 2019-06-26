@@ -32,6 +32,7 @@ services:
     build: ./src/transaction-service
     depends_on:
       - txdb
+      - account-service
     ports:
       - "9002:9002"
   nginx:
