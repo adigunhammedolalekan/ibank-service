@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -77,11 +78,13 @@ func (handler *transactionHandler) fundAccountHandler(ctx *gin.Context)  {
 		ctx.JSON(http.StatusUnauthorized, &Response{Success: false, Message: "unauthorized request: " + err.Error()})
 		return
 	}
+
 	payload := &FundAccountPayload{}
 	if err := ctx.ShouldBindJSON(payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, &Response{Success: false, Message: "bad request: malformed request body"})
 		return
 	}
+
 	w, err := handler.repo.fundAccount(account.AccountNumber, payload.amount())
 	if err != nil {
 		ctx.JSON(200, &Response{Success: false, Message: err.Error()})
@@ -93,6 +96,7 @@ func (handler *transactionHandler) fundAccountHandler(ctx *gin.Context)  {
 
 func (handler *transactionHandler) token(ctx *gin.Context) string {
 	header := ctx.GetHeader(headerKey)
+	log.Println("Parsing token ", header)
 	values := strings.Split(header, " ")
 	if len(values) != 2 {
 		return ""

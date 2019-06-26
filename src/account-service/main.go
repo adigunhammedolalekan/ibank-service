@@ -36,7 +36,7 @@ func main()  {
 	router := gin.Default()
 	group := router.Group("/api")
 	group.POST("/account", handler.createAccountHandler)
-	group.POST("/authenticate", handler.authenticateAccountHandler)
+	group.POST("/account/authenticate", handler.authenticateAccountHandler)
 
 	port := os.Getenv("PORT")
 	if err := router.Run(":" + port); err != nil {

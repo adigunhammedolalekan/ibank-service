@@ -19,6 +19,10 @@ func main()  {
 	}
 
 	db, err := createDbConnection(os.Getenv("DB_URL"))
+	if err != nil {
+		log.Fatal("failed to connect to db ", err)
+	}
+
 	conn, err := grpc.Dial(accountServiceRpcUrl, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("failed to connect to account service ", err)
@@ -41,10 +45,12 @@ func main()  {
 }
 
 func createDbConnection(uri string) (*gorm.DB, error) {
+	log.Println("connecting to uri ", uri)
 	db, err := gorm.Open("mysql", uri)
 	if err != nil {
 		return nil, err
 	}
 
+	db.AutoMigrate(&Wallet{}, &Transaction{})
 	return db, nil
 }

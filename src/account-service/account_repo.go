@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"os"
 )
 
@@ -44,11 +45,20 @@ func (repo *accountRepository) GetAccountByAttr(attr string, value interface{}) 
 
 func (repo *accountRepository) getAccountByObjectId(id string) (*Account, error) {
 	var account Account
-	filter := bson.M {"_id" : id}
-	if err := repo.Col().FindOne(context.Background(), filter).Decode(&account); err != nil {
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Println("error converting objectId ", err)
 		return nil, err
 	}
 
+	filter := bson.D{{"_id", objectId}}
+	if err := repo.Col().FindOne(context.Background(), filter).Decode(&account); err != nil {
+		log.Println("findOne error ", err)
+		return nil, err
+	}
+
+	log.Println("account found ", account)
 	return &account, nil
 }
 

@@ -9,18 +9,22 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongoUser
       MONGO_INITDB_ROOT_PASSWORD: mongoPassword
+    volumes:
+      - /opt/data/db:/data/db
   txdb:
     image: mysql
     restart: always
     container_name: "txdb"
     environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: manman
       MYSQL_DATABASE: transactions
-      MYSQL_ROOT_PASSWORD: txDbPassword
+      MYSQL_ROOT_PASSWORD: txdbpassword
     command: --default-authentication-plugin=mysql_native_password
     ports:
       - "3306:3306"
     volumes:
-      - /opt/mysql_data:/var/lib/mysql
+      - /opt/mysqldb:/var/lib/mysql
   account-service:
     build: ./src/account-service
     restart: always
@@ -30,6 +34,7 @@ services:
       - "9001:9001"
   transaction-service:
     build: ./src/transaction-service
+    restart: always
     depends_on:
       - txdb
       - account-service
@@ -37,6 +42,7 @@ services:
       - "9002:9002"
   nginx:
     build: ./nginx
+    restart: always
     ports:
       - "80:80"
     depends_on:

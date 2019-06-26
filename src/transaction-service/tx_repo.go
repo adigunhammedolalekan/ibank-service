@@ -13,7 +13,7 @@ type transactionRepository struct {
 }
 
 func newTransactionRepository(db *gorm.DB, client pb.AccountServiceClient) *transactionRepository {
-	return &transactionRepository{db:db, client:client}
+	return &transactionRepository{db: db, client:client}
 }
 
 func (repo *transactionRepository) doTransfer(fromAccount, toAccount string, amount int64) (*Transaction, error) {
@@ -38,13 +38,13 @@ func (repo *transactionRepository) doTransfer(fromAccount, toAccount string, amo
 	credit := toWallet.Balance + amount
 	debit := fromWallet.Balance - amount
 
-	err = tx.Table("wallets").Where("account_number", fromAccount).UpdateColumn("balance", debit).Error
+	err = tx.Table("wallets").Where("account_number = ?", fromAccount).UpdateColumn("balance", debit).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	err = tx.Table("wallets").Where("account_number", toAccount).UpdateColumn("balance", credit).Error
+	err = tx.Table("wallets").Where("account_number = ?", toAccount).UpdateColumn("balance", credit).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -66,7 +66,7 @@ func (repo *transactionRepository) doTransfer(fromAccount, toAccount string, amo
 
 func (repo *transactionRepository) history(account string) ([]*Transaction, error) {
 	data := make([]*Transaction, 0)
-	err := repo.db.Table("transactions").Where("account_number", account).Find(&data).Error
+	err := repo.db.Table("transactions").Where("account_number = ?", account).Find(&data).Error
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (repo *transactionRepository) fundAccount(account string, amount int64) (*W
 	}
 
 	newBalance := w.Balance + amount
-	err = repo.db.Table("wallets").Where("account_number", account).UpdateColumn("balance", newBalance).Error
+	err = repo.db.Table("wallets").Where("account_number = ?", account).UpdateColumn("balance", newBalance).Error
 	if err != nil {
 		return nil, err
 	}
@@ -98,11 +98,16 @@ func (repo *transactionRepository) createWallet(account string) (*Wallet, error)
 	return w, nil
 }
 
+// wallet fetches wallet where accountNumber == account params
+// a wallet will be created for this account if doesn't exists before
 func (repo *transactionRepository) wallet(account string) (*Wallet, error) {
 	w := &Wallet{}
-	err := repo.db.Table("wallets").Where("account_number", account).First(w).Error
-	if err != nil {
-		return nil, err
+	err := repo.db.Table("wallets").Where("account_number = ?", account).First(w).Error
+	if err != nil || err == gorm.ErrRecordNotFound {
+		err = repo.db.Create(newWallet(account)).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return w, nil
