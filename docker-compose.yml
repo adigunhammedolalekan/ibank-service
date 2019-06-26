@@ -4,6 +4,8 @@ services:
   accountdb:
     image: mongo:4.1.12
     restart: always
+    ports:
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongoUser
       MONGO_INITDB_ROOT_PASSWORD: mongoPassword
@@ -21,6 +23,7 @@ services:
       - /opt/mysql_data:/var/lib/mysql
   account-service:
     build: ./src/account-service
+    restart: always
     depends_on:
       - accountdb
     ports:

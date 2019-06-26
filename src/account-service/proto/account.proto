@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package pb;
+
+message GetAccountRequest {
+    string accountNumber = 1;
+}
+
+message Account {
+    string name = 1;
+    string password = 2;
+    string email = 3;
+    string accountNumber = 4;
+}
+
+message GetAccountResponse {
+    Account account = 1;
+}
+
+message VerifyTokenRequest {
+    string token = 1;
+}
+
+message VerifyTokenResponse {
+    Account account = 2;
+}
+
+service AccountService {
+    rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+    rpc VerifyAccountToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
+}
