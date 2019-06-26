@@ -45,14 +45,12 @@ func (repo *accountRepository) GetAccountByAttr(attr string, value interface{}) 
 
 func (repo *accountRepository) getAccountByObjectId(id string) (*Account, error) {
 	var account Account
-
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Println("error converting objectId ", err)
 		return nil, err
 	}
 
-	filter := bson.D{{"_id", objectId}}
+	filter := bson.M{"_id" : objectId}
 	if err := repo.Col().FindOne(context.Background(), filter).Decode(&account); err != nil {
 		log.Println("findOne error ", err)
 		return nil, err

@@ -16,8 +16,6 @@ services:
     restart: always
     container_name: "txdb"
     environment:
-      MYSQL_USER: user
-      MYSQL_PASSWORD: manman
       MYSQL_DATABASE: transactions
       MYSQL_ROOT_PASSWORD: txdbpassword
     command: --default-authentication-plugin=mysql_native_password
